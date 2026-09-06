@@ -20,7 +20,7 @@ const wss = new WebSocket.Server({ server });
 // karena ID inilah yang dipetakan ke file gambar/stiker/<id>.mp4
 // =============================================
 const STICKER_IDS = new Set(['nangis', 'bagus', 'tertawa', 'tengil']);
-const STICKER_COOLDOWN_MS = 12000; // 12 detik — berlaku untuk player maupun bot
+const STICKER_COOLDOWN_MS = 8000; // 8 detik — berlaku untuk player maupun bot
 const STICKER_SEND_CHANCE = 0.6; // Meski kondisi terpenuhi, bot cuma 60% kemungkinan benar-benar kirim stiker
 
 // =============================================
@@ -2791,7 +2791,7 @@ class GameEngine {
     // =============================================
     // FITUR STIKER — BOT
     // Bot hanya boleh pakai stiker di mode RANKED (bukan Custom Match/Tantang).
-    // Cooldown 12 detik berlaku sama seperti player (disimpan di bot.lastStickerAt).
+    // Cooldown 8 detik berlaku sama seperti player (disimpan di bot.lastStickerAt).
     // =============================================
     botSendSticker(bot, stickerId) {
         if (!bot || !bot.isBot) return;
