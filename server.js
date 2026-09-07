@@ -1166,13 +1166,29 @@ class GameEngine {
 
         // Helper: pilih kartu terbaik dari pool berdasarkan rarity tertinggi yang tersedia (sesuai DRAW_RATES level)
         // Urutkan rarity dari tertinggi ke terendah berdasarkan nilai rate di level tersebut
-        function pickByHighestRarity(pool) {
+        // [FIX BUG] preferFreshProvince diterapkan DI DALAM tier rarity yang sudah terpilih,
+        // BUKAN dengan memangkas pool sebelum rarity dicek. Sebelumnya, kartu rarity tinggi
+        // (mis. Unik/uncommon) yang kebetulan semuanya dari provinsi yang sudah dipegang pemain
+        // bisa tersingkir duluan sebelum dibandingkan rarity-nya — sehingga rarity lebih rendah
+        // secara prioritas (mis. Mythic) yang kebetulan ada di provinsi baru malah terpilih.
+        // Itu melanggar aturan: rarity dengan persentase/prioritas tertinggi yang MASIH ADA
+        // di pool harus selalu menang duluan; provinsi baru hanya jadi pembeda kalau rarity-nya sama.
+        function pickByHighestRarity(pool, preferFreshProvince = false, ownedProvinces = null) {
             if (pool.length === 0) return null;
             // Urutkan RARITY_ORDER berdasarkan nilai rate tertinggi di level ini (desc)
             const rarityBySortedRate = [...RARITY_ORDER].sort((a, b) => (rateTable[b] ?? 0) - (rateTable[a] ?? 0));
             for (const rarity of rarityBySortedRate) {
                 const candidates = pool.filter(c => c.rarity === rarity);
                 if (candidates.length > 0) {
+                    // Rarity tertinggi yang tersedia sudah ditemukan. Kalau diminta, coba utamakan
+                    // provinsi baru HANYA di antara kandidat rarity ini — kalau tidak ada kandidat
+                    // rarity ini dari provinsi baru, tetap pakai rarity ini juga (jangan turun tier).
+                    if (preferFreshProvince && ownedProvinces) {
+                        const freshCandidates = candidates.filter(c => !ownedProvinces.has(c.province));
+                        const useFresh = freshCandidates.length > 0 && Math.random() < 0.999;
+                        const finalCandidates = useFresh ? freshCandidates : candidates;
+                        return finalCandidates[Math.floor(Math.random() * finalCandidates.length)];
+                    }
                     // Jika ada beberapa kartu dengan rarity sama, pilih acak di antara mereka
                     return candidates[Math.floor(Math.random() * candidates.length)];
                 }
@@ -1189,16 +1205,13 @@ class GameEngine {
         } else {
             // ── TIDAK DAPAT KARTU SATU PROVINSI ──
             const rawPool = nonMatchingCards.length > 0 ? nonMatchingCards : matchingCards;
-            // [FIX] 99.9% dari draw yang "tidak cocok" ini bakal utamakan provinsi yang BELUM
+            // [FIX] Prioritaskan rarity tertinggi dari SELURUH rawPool dulu (sesuai level draw card),
+            // baru DI DALAM tier rarity itu, 99,9% dari draw ini akan utamakan provinsi yang BELUM
             // ada di tangan PEMAIN/BOT INI SENDIRI (bukan pemain lain) — supaya kartu terus
             // menyebar ke provinsi baru, tidak numpuk di provinsi yang sudah dipegang.
             // Sisa 0.1% tetap boleh dapat provinsi yang sudah dipegang (elemen kejutan).
             const ownedProvinces = new Set(player.hand.map(c => c.province));
-            const freshProvincePool = rawPool.filter(c => !ownedProvinces.has(c.province));
-            const useFreshProvince = freshProvincePool.length > 0 && Math.random() < 0.999;
-            const pool = useFreshProvince ? freshProvincePool : rawPool;
-            // Prioritaskan rarity tertinggi dari pool non-matching sesuai level draw card
-            chosen = pickByHighestRarity(pool);
+            chosen = pickByHighestRarity(rawPool, true, ownedProvinces);
         }
 
         // Hapus dari drawPile dan tambahkan ke tangan
