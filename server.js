@@ -1241,12 +1241,14 @@ class GameEngine {
             player.drawLevel = 1;
             player.drawCount = 0;
             player.drawProb = 0;
-            this.broadcastLog(`\uD83D\uDD04 ${player.name} dapat [${resetReason}] (tertinggi)! Level Kartu reset ke Lv1.`);
+            this.broadcastLog(`\uD83D\uDD04 ${player.name} Level Kartu reset ke Lv1 (dapat kartu tertinggi yang tersisa)!`);
+            if (!player.isBot) this.sendToPlayer(player.id, { type: 'LOG', message: `\uD83D\uDD04 Kamu dapat [${resetReason}] (tertinggi)! Level Kartu reset ke Lv1.` });
         }
         const probPct  = Math.round(prob * 100);
         const isMatch  = chosen.province === this.gs.currentProvince;
         const modeStr  = useMatching ? `✅ Cocok [prob ${probPct}%]` : `❌ Non-Cocok [prob ${probPct}%]`;
-        this.broadcastLog(`🎴 ${player.name} [${LEVEL_NAMES[level]}] tambah kartu: ${chosen.name} (${chosen.rarity}/${chosen.province}) ${modeStr}`);
+        this.broadcastLog(`🎴 ${player.name} [${LEVEL_NAMES[level]}] tambah kartu ${modeStr}`);
+        if (!player.isBot) this.sendToPlayer(player.id, { type: 'LOG', message: `🎴 Kamu [${LEVEL_NAMES[level]}] tambah kartu: ${chosen.name} (${chosen.rarity}/${chosen.province}) ${modeStr}` });
         return true;
     }
 
@@ -2067,7 +2069,7 @@ class GameEngine {
             bot.drawOnceNoMatch = false;
             bot.hasPlayed = true;
             this.gs.currentRoundPlays.push({ playerId: bot.id, playerName: bot.name, card: null, power: 0, isDraw: true });
-            this.broadcastLog(`🔄 ${bot.name} tambah kartu 1x: ${newCard?.name} — provinsi ${this.gs.currentProvince} habis di kartu tersisa, selesai.`);
+            this.broadcastLog(`🔄 ${bot.name} tambah kartu 1x — provinsi ${this.gs.currentProvince} habis di kartu tersisa, selesai.`);
             this.broadcastGameState();
             setTimeout(() => { if (!this.gs.gameOver) this.checkPhase2End(); }, 400);
             return;
@@ -2075,7 +2077,7 @@ class GameEngine {
 
         if (isMatch) {
             bot.mustDraw = false; bot.mustPlayMatching = true;
-            this.broadcastLog(`✅ ${bot.name} dapat kartu cocok: ${newCard.name} — langsung dijatuhkan!`);
+            this.broadcastLog(`✅ ${bot.name} dapat kartu cocok — langsung dijatuhkan!`);
             setTimeout(() => {
                 if (!bot.hasPlayed) this.handlePlayCardInternal(bot, newCard);
             }, 800);
@@ -2092,7 +2094,7 @@ class GameEngine {
                 return;
             }
             this.gs.currentRoundPlays.push({ playerId: bot.id, playerName: bot.name, card: null, power: 0, isDraw: true });
-            this.broadcastLog(`🔄 ${bot.name} tambah kartu: ${newCard.name} (${newCard.rarity}) — belum cocok, tambah kartu lagi...`);
+            this.broadcastLog(`🔄 ${bot.name} tambah kartu — belum cocok, tambah kartu lagi...`);
             this.broadcastGameState();
             // Bot terus draw sampai dapat kartu cocok atau pile habis
             setTimeout(() => this.botDrawSimultaneous(bot), 700);
@@ -2305,7 +2307,8 @@ class GameEngine {
                 player.drawOnceNoMatch = false;
                 player.hasPlayed = true;
                 this.gs.currentRoundPlays.push({ playerId: player.id, playerName: player.name, card: null, power: 0, isDraw: true });
-                this.broadcastLog(`🔄 ${player.name} tambah kartu 1x: ${newCard?.name} (${newCard?.rarity}) — provinsi ${this.gs.currentProvince} habis di kartu tersisa, ronde berlanjut.`);
+                this.broadcastLog(`🔄 ${player.name} tambah kartu 1x — provinsi ${this.gs.currentProvince} habis di kartu tersisa, ronde berlanjut.`);
+                if (!player.isBot) this.sendToPlayer(player.id, { type: 'LOG', message: `🔄 Kamu tambah kartu 1x: ${newCard?.name} (${newCard?.rarity}) — provinsi ${this.gs.currentProvince} habis di kartu tersisa, ronde berlanjut.` });
                 this.broadcastGameState();
                 setTimeout(() => this.checkPhase2End(), 500);
                 return;
@@ -2315,7 +2318,8 @@ class GameEngine {
                 // Dapat kartu cocok → wajib jatuhkan kartu itu
                 player.mustDraw = false;
                 player.mustPlayMatching = true;
-                this.broadcastLog(`✅ ${player.name} mendapat kartu cocok: ${newCard.name} (${this.gs.currentProvince}) — harus dijatuhkan!`);
+                this.broadcastLog(`✅ ${player.name} mendapat kartu cocok — harus dijatuhkan!`);
+                if (!player.isBot) this.sendToPlayer(player.id, { type: 'LOG', message: `✅ Kamu mendapat kartu cocok: ${newCard.name} (${this.gs.currentProvince}) — harus dijatuhkan!` });
                 this.broadcastGameState();
                 if (!player.isBot && !player.autoMode) {
                     // Human manual: tunggu aksi PLAY_CARD dari client
@@ -2352,7 +2356,8 @@ class GameEngine {
                 player.mustDraw = true;
                 player.hasPlayed = false;
                 this.gs.currentRoundPlays.push({ playerId: player.id, playerName: player.name, card: null, power: 0, isDraw: true });
-                this.broadcastLog(`🔄 ${player.name} tambah kartu: ${newCard?.name} (${newCard?.rarity}) — belum cocok.`);
+                this.broadcastLog(`🔄 ${player.name} tambah kartu — belum cocok.`);
+                if (!player.isBot) this.sendToPlayer(player.id, { type: 'LOG', message: `🔄 Kamu tambah kartu: ${newCard?.name} (${newCard?.rarity}) — belum cocok.` });
                 this.broadcastGameState();
                 if (!player.isBot && !player.autoMode) {
                     // Human manual: pasang AFK timer, tunggu aksi dari client
