@@ -3875,6 +3875,16 @@ wss.on('connection', (socket) => {
                             }
                         }
                     }
+                    // [FIX ACK] Konfirmasi ke client bahwa LEAVE_MATCH sudah diproses server.
+                    // Dipakai client untuk menutup WebSocket dengan aman (menunggu ack ini
+                    // sebelum benar-benar close), supaya di koneksi lemah pesan LEAVE_MATCH
+                    // tidak terputus di tengah jalan sebelum sempat diproses server — salah
+                    // satu penyebab pemain "nyasar" balik ke room lama saat bikin lobi baru.
+                    // Pesan ini murni tambahan; client lama yang belum mengenalinya akan
+                    // mengabaikannya begitu saja (tidak ada case untuk tipe ini di switch-nya).
+                    if (socket.readyState === WebSocket.OPEN) {
+                        try { socket.send(JSON.stringify({ type: 'LEAVE_MATCH_ACK', roomId: data.roomId || null })); } catch(_) {}
+                    }
                     break;
 
                 case 'FIND_MY_ROOM':
