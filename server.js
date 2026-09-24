@@ -45,7 +45,7 @@ const ALL_PROVINCES = [
                 { name: "Kopi Kintamani",             type: "Sumber Daya Alam",        rarity: "uncommonplus",      power: 3 },
                 { name: "Pura Besakih",               type: "Bangunan Bersejarah", rarity: "legendary",   power: 9 },
                 { name: "Pariwisata Budaya",          type: "Sektor Ekonomi",      rarity: "commonplus",    power: 2 },
-                { name: "Rumah Gapura Candi Bentar",  type: "Rumah Adat",          rarity: "epic",        power: 8 },
+                { name: "Rumah Bale Manten",  type: "Rumah Adat",          rarity: "epic",        power: 8 },
                 { name: "Keris Bali",                 type: "Senjata Tradisional", rarity: "mythic",    power: 10 },
                 { name: "Payas Agung",                type: "Pakaian Adat",        rarity: "magis",        power: 12 },
                 { name: "Gamelan Bali",               type: "Alat Musik",          rarity: "sakral",    power: 11 },
