@@ -70,7 +70,7 @@ const ALL_PROVINCES = [
                 { name: "Bahasa Melayu Bangka",                 type: "Bahasa Daerah",       rarity: "uncommon",       power: 4 },
             ]},
             { name: "Banten", cards: [
-                { name: "Baja & Industri",            type: "Sumber Daya Alam",        rarity: "uncommonplus",      power: 3 },
+                { name: "Pasir Kuarsa",               type: "Sumber Daya Alam",        rarity: "uncommonplus",      power: 3 },
                 { name: "Masjid Agung Banten",        type: "Bangunan Bersejarah", rarity: "legendary",   power: 9 },
                 { name: "Industri Baja",              type: "Sektor Ekonomi",      rarity: "commonplus",    power: 2 },
                 { name: "Rumah Baduy",                type: "Rumah Adat",          rarity: "epic",        power: 8 },
